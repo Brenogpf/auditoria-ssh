@@ -29,7 +29,7 @@ RUN apt update && apt install -y \
 # Cria estrutura de logs customizada
 RUN mkdir -p /var/log/security_lab/ && chmod 755 /var/log/security_lab/
 
-# Cria um usuário padrão para o laboratório (opcional)
+# Cria um usuário padrão para o laboratório 
 RUN useradd -m -s /bin/bash aluno && echo "aluno:123456789" | chpasswd && adduser aluno sudo
 
 # Configura SSH básico

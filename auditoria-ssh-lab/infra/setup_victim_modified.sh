@@ -34,7 +34,7 @@ echo "Setup victim completo. Usuário: professor / senha: Prof1234"
 # setup_victim_modified.sh
 
 # --- MITIGAÇÃO V#1: HARDENING SSH ---
-echo "--- 1. Securing SSH Configuration ---"
+echo "--- 1. Protegendo a configuração SSH ---"
 # Secure SSH configuration
 sed -i 's/PasswordAuthentication yes/PasswordAuthentication no/' /etc/ssh/sshd_config
 # Adicionar outras diretivas de segurança
@@ -42,27 +42,27 @@ echo "PermitRootLogin no" >> /etc/ssh/sshd_config
 echo "PubkeyAuthentication yes" >> /etc/ssh/sshd_config
 echo "MaxAuthTries 3" >> /etc/ssh/sshd_config
 service ssh restart
-echo "SSH secured."
+echo "SSH seguro!."
 
 # --- MITIGAÇÃO V#2: FIREWALL ---
-echo "--- 2. Enabling Firewall ---"
+echo "--- 2. Habilitando Firewall ---"
 # Enable firewall
 ufw allow ssh
 ufw deny 21/tcp # FTP
 ufw deny 23/tcp # Telnet
 ufw --force enable
-echo "Firewall enabled and configured."
+echo "Firewall habilitado e configurado."
 
 # --- MITIGAÇÃO V#3: DESABILITAR SERVIÇOS INSEGUROS ---
-echo "--- 3. Disabling Insecure Services ---"
+echo "--- 3. Desabilitando Serviços inseguros ---"
 systemctl stop vsftpd
 systemctl disable vsftpd
 systemctl stop inetutils-inetd
 systemctl disable inetutils-inetd
-echo "Insecure services (vsftpd, telnetd) disabled."
+echo "Serviços inseguros(vsftpd, telnetd) desabilitados."
 
 # --- MITIGAÇÃO V#4: POLÍTICA DE SENHAS ---
-echo "--- 4. Enforcing Strong Password Policy ---"
+echo "--- 4. Implementar uma política de senhas fortes ---"
 apt-get install -y libpam-pwquality
 cat > /etc/security/pwquality.conf <<EOF
 minlen = 12
@@ -72,29 +72,25 @@ ucredit = -1
 lcredit = -1
 ocredit = -1
 EOF
-echo "Strong password policy enforced."
+echo "Política de senhas fortes em vigor."
 
 # --- MITIGAÇÃO V#5: REMOVER PRIVILÉGIOS EXCESSIVOS ---
-echo "--- 5. Removing Excessive Privileges ---"
+echo "--- 5. Removendo Privilegios Excessivos ---"
 sed -i '/professor.*NOPASSWD/d' /etc/sudoers
-echo "Passwordless sudo for 'professor' removed."
+echo "Sudo sem senha para 'professor' removido."
 
 # --- MITIGAÇÃO V#6: REMOÇÃO DE CREDENCIAIS EXPOSTAS ---
-echo "--- 6. Removing Exposed Credentials ---"
+echo "--- 6. Removendo Credenciais Expostas ---"
 rm -f /home/professor/anotacoes.txt
-echo "Exposed credentials file removed."
+echo "Arquivo com credenciais removido."
 
 # --- MITIGAÇÃO V#7: HARDENING DO SO ---
-echo "--- 7. Applying OS Hardening ---"
+echo "--- 7. Aplicando Hardening no Sistema Operacional ---"
 cat > /etc/sysctl.d/99-hardening.conf <<EOF
 net.ipv4.conf.all.rp_filter = 1
 net.ipv4.tcp_syncookies = 1
 kernel.randomize_va_space = 2
 EOF
 sysctl -p
-echo "OS hardening parameters applied."
-
-# (Optional) Example of removing a suspicious user
-# userdel -r alunoperturbador
-
-echo "--- Hardening script complete. ---"
+echo "Parametros de hardening aplicados no SO."
+echo "--- Script de Hardening completo. ---"
