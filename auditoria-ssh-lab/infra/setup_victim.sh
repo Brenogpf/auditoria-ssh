@@ -29,8 +29,11 @@ AllowUsers professor
 EOF
 
 # Reinicia o SSH
-service ssh restart
-service rsyslog restart
+/etc/init.d/ssh restart
+
+# Inicia o rsyslog
+# /usr/sbin/rsyslogd
+echo "GEMINI_DEBUG: Running modified setup_victim.sh"
 
 # Instala servicos inseguros adicionais
 apt-get install -y vsftpd telnetd
@@ -39,8 +42,8 @@ apt-get install -y vsftpd telnetd
 echo "professor ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
 
 # Start insecure services
-service vsftpd restart
-service inetutils-inetd restart
+/usr/sbin/vsftpd &
+/usr/sbin/inetd
 
 # VULNERABILIDADE DE ENGENHARIA SOCIAL: Credenciais expostas
 cat > /home/professor/anotacoes.txt <<'EOL'

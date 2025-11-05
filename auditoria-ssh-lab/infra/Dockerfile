@@ -24,6 +24,7 @@ RUN apt update && apt install -y \
     auditd \
     rsyslog \
     systemctl \
+    ufw \
  && apt clean && rm -rf /var/lib/apt/lists/*
 
 # Cria estrutura de logs customizada
@@ -43,7 +44,10 @@ WORKDIR /root
 # Adicionado para diferenciar os setups
 ARG SETUP_SCRIPT
 COPY setup_*.sh /root/
-RUN if [ -n "$SETUP_SCRIPT" ]; then bash "$SETUP_SCRIPT"; fi
+# Durante o build definimos SKIP_NET=1 para evitar que o processo de build tente
+# aplicar regras de rede/kernel (iptables/sysctl) — essas operações exigem
+# privilégios/capacidades de runtime e falham dentro de um build container.
+RUN if [ -n "$SETUP_SCRIPT" ]; then SKIP_NET=1 bash "$SETUP_SCRIPT"; fi
 
 # Porta padrão SSH
 EXPOSE 22
