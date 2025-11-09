@@ -39,18 +39,22 @@ RUN mkdir -p /var/run/sshd && \
     echo "PasswordAuthentication yes" >> /etc/ssh/sshd_config
 
 # Define o diretório de trabalho
+RUN apt-get update && apt-get install -y sshpass
 WORKDIR /root
+COPY exploits-safe/exploit.sh /tmp/exploit.sh
 
 # Adicionado para diferenciar os setups
 ARG SETUP_SCRIPT
-COPY setup_*.sh /root/
+COPY infra/setup_*.sh /root/
 # Durante o build definimos SKIP_NET=1 para evitar que o processo de build tente
 # aplicar regras de rede/kernel (iptables/sysctl) — essas operações exigem
 # privilégios/capacidades de runtime e falham dentro de um build container.
-RUN if [ -n "$SETUP_SCRIPT" ]; then SKIP_NET=1 bash "$SETUP_SCRIPT"; fi
+RUN if [ -n "$SETUP_SCRIPT" ]; then bash "$SETUP_SCRIPT"; fi
 
 # Porta padrão SSH
+EXPOSE 21
 EXPOSE 22
+EXPOSE 23
 
 # Comando padrão: inicia SSH e mantém container ativo
 CMD ["/usr/sbin/sshd", "-D"]

@@ -1,20 +1,30 @@
 #!/bin/bash
-# infra/setup_victim.sh — executa dentro do container victim como root
+# infra/setup_victim.sh — Configura o container da vítima com vulnerabilidades intencionais.
 
 set -e
 
-# cria usuário "professor" com senha fraca
+echo "Iniciando configuração do container da vítima com vulnerabilidades..."
+
+# Cria um usuário "professor" com senha fraca e anota as credenciais em um arquivo de texto.
 useradd -m -s /bin/bash professor
 echo "professor:Prof1234" | chpasswd
+cat > /home/professor/anotacoes.txt <<'EOL'
+Lembrete:
+Usuario: professor
+Senha: Prof1234
+IP da Maquina: 172.17.0.2
+EOL
+chown professor:professor /home/professor/anotacoes.txt
+echo "Vulnerabilidade 'Engenharia Social' configurada: Credenciais em /home/professor/anotacoes.txt"
 
-# instala ssh server
+# Instala pacotes essenciais para o SSH e outros serviços
 apt update
-DEBIAN_FRONTEND=noninteractive apt install -y openssh-server rsyslog sshpass
+DEBIAN_FRONTEND=noninteractive apt install -y openssh-server rsyslog sshpass vsftpd telnetd
 
-# garante diretórios
+# Garante que o diretório para o SSH esteja presente
 mkdir -p /var/run/sshd
 
-# configura sshd para permitir password (vulnerável para simulação)
+# Configura o SSH para permitir autenticação por senha, tornando-o vulnerável.
 cp /etc/ssh/sshd_config /etc/ssh/sshd_config.bak
 cat >/etc/ssh/sshd_config <<'EOF'
 Port 22
@@ -27,35 +37,34 @@ PermitEmptyPasswords no
 MaxAuthTries 6
 AllowUsers professor
 EOF
-
-# Reinicia o SSH
 /etc/init.d/ssh restart
+echo "Vulnerabilidade 'SSH com Senha' configurada: PasswordAuthentication ativado."
 
-# Inicia o rsyslog
-# /usr/sbin/rsyslogd
-echo "GEMINI_DEBUG: Running modified setup_victim.sh"
-
-# Instala servicos inseguros adicionais
-apt-get install -y vsftpd telnetd
-
-# Configure sudo for passwordless privilege escalation
+# Configura o usuário 'professor' para ter escalonamento de privilégios sem senha.
 echo "professor ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
+echo "Vulnerabilidade 'Sudo sem Senha' configurada para o usuário 'professor'."
 
-# Start insecure services
-/usr/sbin/vsftpd &
+# Instala e inicia serviços inseguros como FTP e Telnet.
+echo "telnet stream tcp nowait root /usr/sbin/tcpd /usr/sbin/in.telnetd" > /etc/inetd.conf
 /usr/sbin/inetd
 
-# VULNERABILIDADE DE ENGENHARIA SOCIAL: Credenciais expostas
-cat > /home/professor/anotacoes.txt <<'EOL'
-Lembrete:
-Usuario: professor
-Senha: Prof1234
-IP da Maquina: 172.17.0.2
-EOL
-chown professor:professor /home/professor/anotacoes.txt
+# Configura e inicia o vsftpd
+echo "listen=YES" >> /etc/vsftpd.conf
+/usr/sbin/vsftpd &
 
-# Gera logs para analise forense
-sshpass -p "wrongpassword" ssh -o StrictHostKeyChecking=no professor@localhost || echo "Login falhou como esperado"
-sshpass -p "Prof1234" ssh -o StrictHostKeyChecking=no professor@localhost "echo 'Login bem sucedido'"
+echo "Vulnerabilidade 'Serviços Inseguros' configurada: FTP e Telnet ativos."
 
-echo "Setup victim completo. Usuário: professor / senha: Prof1234"
+# O sistema não terá firewall ativo por padrão. (Nenhuma ação necessária aqui, apenas a ausência de configuração de firewall)
+echo "Vulnerabilidade 'Firewall Desativado': Nenhum firewall configurado."
+
+# Nenhuma política de senhas fortes será aplicada. (Nenhuma ação necessária aqui)
+echo "Vulnerabilidade 'Política de Senhas Fraca': Nenhuma política de senhas fortes aplicada."
+
+# Nenhuma configuração de hardening de SO será aplicada. (Nenhuma ação necessária aqui)
+echo "Vulnerabilidade 'Sistema sem Hardening': Nenhuma configuração de hardening aplicada."
+
+# Gera logs para análise forense (simulação de tentativas de login)
+sshpass -p "wrongpassword" ssh -o StrictHostKeyChecking=no professor@localhost || echo "Login falhou como esperado (para logs)"
+sshpass -p "Prof1234" ssh -o StrictHostKeyChecking=no professor@localhost "echo 'Login bem sucedido (para logs)'"
+
+echo "Configuração do container da vítima concluída. Usuário: professor / senha: Prof1234"

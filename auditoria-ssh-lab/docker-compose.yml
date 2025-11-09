@@ -3,7 +3,8 @@ version: '3.8'
 services:
   attacker:
     build:
-      context: ./infra
+      context: .
+      dockerfile: ./infra/Dockerfile
       args:
         SETUP_SCRIPT: setup_attacker.sh
     container_name: attacker
@@ -12,7 +13,8 @@ services:
 
   victim:
     build:
-      context: ./infra
+      context: .
+      dockerfile: ./infra/Dockerfile
       args:
         SETUP_SCRIPT: setup_victim.sh
     container_name: victim
@@ -20,18 +22,7 @@ services:
       - "2222:22"
     networks:
       - lab-network
-
-  victim_hardened:
-    build:
-      context: ./infra
-      args:
-        SETUP_SCRIPT: setup_victim_modified.sh
-    container_name: victim_hardened
-    ports:
-      - "2223:22"
-    networks:
-      - lab-network
-
+      
 networks:
   lab-network:
     driver: bridge

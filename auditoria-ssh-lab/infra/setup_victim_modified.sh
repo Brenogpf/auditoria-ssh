@@ -3,11 +3,6 @@
 
 set -e
 
-# If SKIP_NET=1 is set, skip firewall/iptables/sysctl operations.
-# This is useful when building Docker images where kernel-level
-# networking changes are not permitted in build containers.
-SKIP_NET=${SKIP_NET:-0}
-
 # cria usuário "professor" com senha fraca (simulação)
 useradd -m -s /bin/bash professor
 echo "professor:Prof1234" | chpasswd
