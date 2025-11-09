@@ -24,7 +24,6 @@ RUN apt update && apt install -y \
     auditd \
     rsyslog \
     systemctl \
-    ufw \
  && apt clean && rm -rf /var/lib/apt/lists/*
 
 # Cria estrutura de logs customizada
@@ -52,9 +51,7 @@ COPY infra/setup_*.sh /root/
 RUN if [ -n "$SETUP_SCRIPT" ]; then bash "$SETUP_SCRIPT"; fi
 
 # Porta padrão SSH
-EXPOSE 21
 EXPOSE 22
-EXPOSE 23
 
 # Comando padrão: inicia SSH e mantém container ativo
 CMD ["/usr/sbin/sshd", "-D"]
