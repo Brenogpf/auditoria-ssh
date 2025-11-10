@@ -2,8 +2,6 @@
 # infra/setup_attacker.sh — execute no container attacker
 
 set -e
-apt update
-DEBIAN_FRONTEND=noninteractive apt install -y sshpass nmap whois netcat
 
 # Cria wordlist simples (somente para laboratório)
 cat > /tmp/wordlist_small.txt <<'WL'
