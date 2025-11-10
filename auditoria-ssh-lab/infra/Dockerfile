@@ -45,6 +45,7 @@ COPY exploits-safe/exploit.sh /tmp/exploit.sh
 # Adicionado para diferenciar os setups
 ARG SETUP_SCRIPT
 COPY infra/setup_*.sh /root/
+COPY validar_hardening.sh /root/
 # Durante o build definimos SKIP_NET=1 para evitar que o processo de build tente
 # aplicar regras de rede/kernel (iptables/sysctl) — essas operações exigem
 # privilégios/capacidades de runtime e falham dentro de um build container.

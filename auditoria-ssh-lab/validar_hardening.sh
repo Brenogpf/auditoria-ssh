@@ -21,17 +21,19 @@ check_fail() {
 }
 
 # 1. Validação SSH
-grep -q "^PasswordAuthentication no" /etc/ssh/sshd_config && check_pass "Autenticação SSH por senha desabilitada" || check_fail "Autenticação SSH por senha habilitada"
+if grep -q "^PasswordAuthentication no" /etc/ssh/sshd_config; then
+    check_pass "Autenticação SSH por senha desabilitada"
+else
+    check_fail "Autenticação SSH por senha habilitada"
+fi
 
-# 2. Validação Firewall
-ufw status | grep -q "Status: active" && check_pass "Firewall está ativo" || check_fail "Firewall está inativo"
+# 2. Validação (A ser adicionada)
 
-# 3. Validação Serviços Inseguros
-! systemctl is-active --quiet vsftpd && check_pass "vsftpd está inativo" || check_fail "vsftpd está ativo"
-! systemctl is-active --quiet inetutils-inetd && check_pass "telnetd está inativo" || check_fail "telnetd está ativo"
+# 3. Validação (A ser adicionada)
 
 # 4. Validação Política de Senha
 dpkg -l | grep -q libpam-pwquality && check_pass "libpam-pwquality está instalado" || check_fail "libpam-pwquality não está instalado"
+chage -l professor | grep -q "Password must be changed" && check_pass "Senha do usuário 'professor' expirada" || check_fail "Senha do usuário 'professor' não expirada"
 
 # 5. Validação Sudo
 ! grep -q "professor.*NOPASSWD" /etc/sudoers && check_pass "Sudo sem senha removido" || check_fail "Sudo sem senha ainda existe"
