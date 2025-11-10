@@ -18,8 +18,6 @@ chown professor:professor /home/professor/anotacoes.txt
 echo "Vulnerabilidade 'Engenharia Social' configurada: Credenciais em /home/professor/anotacoes.txt"
 
 # Instala pacotes essenciais para o SSH e outros serviços
-apt update
-DEBIAN_FRONTEND=noninteractive apt install -y openssh-server rsyslog sshpass
 
 # Garante que o diretório para o SSH esteja presente
 mkdir -p /var/run/sshd

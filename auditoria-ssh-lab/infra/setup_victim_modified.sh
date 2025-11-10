@@ -32,9 +32,13 @@ EOF
 
 echo "Setup victim completo. Usuário: professor / senha: 123456789"
 
-# --- MITIGAÇÃO V#1: HARDENING SSH ---
-echo "--- 1. Protegendo a configuração SSH ---"
-# Secure SSH configuration
+# --- MITIGAÇÃO V#1: REMOÇÃO DE CREDENCIAIS EXPOSTAS ---
+echo "--- 1. Removendo Credenciais Expostas ---"
+rm -f /home/professor/anotacoes.txt || true
+echo "Arquivo com credenciais removido."
+
+# --- MITIGAÇÃO V#2: HARDENING SSH ---
+echo "--- 2. Protegendo a configuração SSH ---"
 sed -i 's/PasswordAuthentication yes/PasswordAuthentication no/' /etc/ssh/sshd_config || true
 # Adicionar outras diretivas de segurança de forma idempotente
 grep -q '^PermitRootLogin no' /etc/ssh/sshd_config || echo "PermitRootLogin no" >> /etc/ssh/sshd_config
@@ -42,12 +46,14 @@ grep -q '^PubkeyAuthentication yes' /etc/ssh/sshd_config || echo "PubkeyAuthenti
 grep -q '^MaxAuthTries' /etc/ssh/sshd_config || echo "MaxAuthTries 3" >> /etc/ssh/sshd_config
 echo "SSH seguro!."
 
-# --- MITIGAÇÃO V#2: (A ser adicionada) ---
+# --- MITIGAÇÃO V#3: REMOVER PRIVILÉGIOS EXCESSIVOS ---
+echo "--- 3. Removendo Privilegios Excessivos ---"
+sed -i '/professor.*NOPASSWD/d' /etc/sudoers || true
+echo "Sudo sem senha para 'professor' removido."
 
-# --- MITIGAÇÃO V#3: (A ser adicionada) ---
 
 # --- MITIGAÇÃO V#4: POLÍTICA DE SENHAS ---
-echo "--- 2. Implementar uma política de senhas fortes ---"
+echo "--- . Implementar uma política de senhas fortes ---"
 apt-get install -y libpam-pwquality || true
 cat > /etc/security/pwquality.conf <<EOF
 minlen = 12
@@ -59,16 +65,6 @@ ocredit = -1
 EOF
 chage -d 0 professor
 echo "Política de senhas fortes em vigor e senha do usuário 'professor' expirada."
-
-# --- MITIGAÇÃO V#5: REMOVER PRIVILÉGIOS EXCESSIVOS ---
-echo "--- 3. Removendo Privilegios Excessivos ---"
-sed -i '/professor.*NOPASSWD/d' /etc/sudoers || true
-echo "Sudo sem senha para 'professor' removido."
-
-# --- MITIGAÇÃO V#6: REMOÇÃO DE CREDENCIAIS EXPOSTAS ---
-echo "--- 4. Removendo Credenciais Expostas ---"
-rm -f /home/professor/anotacoes.txt || true
-echo "Arquivo com credenciais removido."
 
 # --- MITIGAÇÃO V#7: HARDENING DO SO ---
 echo "--- 5. Aplicando Hardening no Sistema Operacional ---"
